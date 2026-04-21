@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Z-Works | 指示受けの教科書</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+        .scene-card { display: none; }
+        .scene-card.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: #3b82f6; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .risk-badge { background: #fee2e2; color: #991b1b; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: bold; }
+        .method-badge { background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: bold; }
+        .benefit-badge { background: #e0f2fe; color: #075985; padding: 2px 8px; border-radius: 99px; font-size: 10px; font-weight: bold; }
+    </style>
+</head>
+<body class="text-slate-800 pb-28">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-blue-600 flex items-center">
+                <i class="fa-solid fa-lightbulb mr-2 text-yellow-400"></i>Z-Works
+            </h1>
+            <div id="user-id-display" class="text-[10px] text-slate-400 bg-slate-50 px-2 py-1 rounded">User: Guest</div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto p-4">
+        
+        <!-- Tabs -->
+        <div class="flex overflow-x-auto border-b border-slate-200 mb-6 no-scrollbar sticky top-16 bg-white/90 backdrop-blur-md z-40">
+            <button onclick="showScene('sim')" id="tabsim" class="tab-btn flex-shrink-0 px-5 py-3 text-sm font-bold tab-active">
+                <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>クイック診断
+            </button>
+            <button onclick="showScene(1)" id="tab1" class="tab-btn flex-shrink-0 px-5 py-3 text-sm font-bold text-slate-500">
+                1. 曖昧指示図鑑
+            </button>
+            <button onclick="showScene(2)" id="tab2" class="tab-btn flex-shrink-0 px-5 py-3 text-sm font-bold text-slate-500">
+                2. 優先順位
+            </button>
+            <button onclick="showScene('mypage')" id="tabmypage" class="tab-btn flex-shrink-0 px-5 py-3 text-sm font-bold text-slate-500 text-blue-600">
+                <i class="fa-solid fa-folder-open mr-1"></i>マイメモ
+            </button>
+        </div>
+
+        <!-- Simulator Section (代替案: ロジックベース診断) -->
+        <div id="scenesim" class="scene-card active">
+            <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl shadow-xl overflow-hidden mb-6 p-6 text-white">
+                <h3 class="text-xl font-bold mb-2 flex items-center">
+                    <i class="fa-solid fa-magnifying-glass-chart mr-2"></i>指示解像度チェッカー
+                </h3>
+                <p class="text-sm opacity-90 mb-6">指示に含まれる要素をチェックして、不足している情報を確認しましょう。</p>
+                
+                <div class="space-y-3 mb-6">
+                    <label class="flex items-center space-x-3 bg-white/10 p-3 rounded-xl cursor-pointer hover:bg-white/20 transition">
+                        <input type="checkbox" class="w-5 h-5 rounded border-none text-blue-500" id="check-deadline">
+                        <span class="text-sm">「いつまで（期限）」が明確か</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-white/10 p-3 rounded-xl cursor-pointer hover:bg-white/20 transition">
+                        <input type="checkbox" class="w-5 h-5 rounded border-none text-blue-500" id="check-target">
+                        <span class="text-sm">「誰に対して（相手）」が明確か</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-white/10 p-3 rounded-xl cursor-pointer hover:bg-white/20 transition">
+                        <input type="checkbox" class="w-5 h-5 rounded border-none text-blue-500" id="check-format">
+                        <span class="text-sm">「どんな形（メール/資料）」が明確か</span>
+                    </label>
+                    <label class="flex items-center space-x-3 bg-white/10 p-3 rounded-xl cursor-pointer hover:bg-white/20 transition">
+                        <input type="checkbox" class="w-5 h-5 rounded border-none text-blue-500" id="check-priority">
+                        <span class="text-sm">「優先順位（他の仕事）」が明確か</span>
+                    </label>
+                </div>
+                
+                <button onclick="runCheck()" class="w-full bg-white text-indigo-700 py-3 rounded-xl font-black text-sm shadow-lg hover:bg-indigo-50 transition active:scale-95">
+                    診断する
+                </button>
+            </div>
+            <div id="check-result" class="hidden bg-white rounded-3xl shadow-md p-6 mb-6"></div>
+        </div>
+
+        <!-- Scene 1: 曖昧指示図鑑 -->
+        <div id="scene1" class="scene-card">
+            <h2 class="text-lg font-bold mb-4 px-2 text-slate-500">「それ、どういう意味？」曖昧指示図鑑</h2>
+            <div class="space-y-6">
+                <!-- 各項目 (1-5) -->
+                <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100">
+                    <div class="bg-yellow-400 p-3 flex justify-between items-center text-yellow-900 font-bold">
+                        <h3>1. 「いい感じにまとめといて」</h3>
+                        <span class="text-[10px] bg-white/30 px-2 py-1 rounded">解像度 20%</span>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-sm mb-3">誰に、何のために、どの程度のボリュームで出すかが不明。</p>
+                        <div class="bg-red-50 p-3 rounded-xl mb-4 text-xs text-red-800">
+                            <span class="risk-badge mb-2 inline-block">RISK</span> 「これじゃない」と一蹴され、やり直しになる原因。
+                        </div>
+                        <div class="bg-blue-600 text-white p-4 rounded-2xl text-sm font-bold">
+                            <p class="text-[10px] opacity-80 mb-1">切り返しフレーズ</p>
+                            「方向性を合わせたいので、本日中に構成案だけお送りしてよろしいですか？」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100">
+                    <div class="bg-orange-400 p-3 flex justify-between items-center text-orange-900 font-bold">
+                        <h3>2. 「なるはやでお願い」</h3>
+                        <span class="text-[10px] bg-white/30 px-2 py-1 rounded">解像度 40%</span>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-sm mb-3">上司の「なるはや」が「1時間後」か「今日中」かが不明。</p>
+                        <div class="bg-red-50 p-3 rounded-xl mb-4 text-xs text-red-800">
+                            <span class="risk-badge mb-2 inline-block">RISK</span> 優先順位の調整がつかず「まだできてないの？」と言われる。
+                        </div>
+                        <div class="bg-blue-600 text-white p-4 rounded-2xl text-sm font-bold">
+                            <p class="text-[10px] opacity-80 mb-1">切り返しフレーズ</p>
+                            「承知いたしました。◯時までにお手元にあれば間に合いますでしょうか？」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100">
+                    <div class="bg-green-400 p-3 flex justify-between items-center text-green-900 font-bold">
+                        <h3>3. 「例の件、適当にまとめといて」</h3>
+                        <span class="text-[10px] bg-white/30 px-2 py-1 rounded">解像度 10%</span>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-sm mb-3">対象範囲とアウトプット形式（メールか、グラフ入りの資料か）が不明。</p>
+                        <div class="bg-red-50 p-3 rounded-xl mb-4 text-xs text-red-800">
+                            <span class="risk-badge mb-2 inline-block">RISK</span> 10枚の資料を作ったのに「チャット一言でよかった」となる過剰労働。
+                        </div>
+                        <div class="bg-blue-600 text-white p-4 rounded-2xl text-sm font-bold">
+                            <p class="text-[10px] opacity-80 mb-1">切り返しフレーズ</p>
+                            「メールでの概要報告でよろしいでしょうか、それとも会議資料が必要でしょうか？」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100">
+                    <div class="bg-purple-400 p-3 flex justify-between items-center text-purple-900 font-bold">
+                        <h3>4. 「もっと抜本的に考えてみて」</h3>
+                        <span class="text-[10px] bg-white/30 px-2 py-1 rounded">解像度 30%</span>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-sm mb-3">現状の何がダメで、どの方向に舵を切りたいかの「軸」が不明。</p>
+                        <div class="bg-red-50 p-3 rounded-xl mb-4 text-xs text-red-800">
+                            <span class="risk-badge mb-2 inline-block">RISK</span> 言葉は大きいが具体的アクションに落込めず、思考停止に陥る。
+                        </div>
+                        <div class="bg-blue-600 text-white p-4 rounded-2xl text-sm font-bold">
+                            <p class="text-[10px] opacity-80 mb-1">切り返しフレーズ</p>
+                            「現状の◯◯という点自体を変えるイメージでしょうか？具体案を2案出し直します。」
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-slate-100">
+                    <div class="bg-slate-400 p-3 flex justify-between items-center text-slate-900 font-bold">
+                        <h3>5. 「阿吽の呼吸（言わなくても…）」</h3>
+                        <span class="text-[10px] bg-white/30 px-2 py-1 rounded">解像度 5%</span>
+                    </div>
+                    <div class="p-5">
+                        <p class="text-sm mb-3">前提条件やこれまでの経緯が端折られており、新入社員には暗号。</p>
+                        <div class="bg-red-50 p-3 rounded-xl mb-4 text-xs text-red-800">
+                            <span class="risk-badge mb-2 inline-block">RISK</span> 忖度を求められるため、確認を怠ると致命的なボタンの掛け違いに。
+                        </div>
+                        <div class="bg-blue-600 text-white p-4 rounded-2xl text-sm font-bold">
+                            <p class="text-[10px] opacity-80 mb-1">切り返しフレーズ</p>
+                            「不勉強で申し訳ありません。認識を合わせたいので、これまでの経緯を簡単に伺えますか？」
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 2: 優先順位 -->
+        <div id="scene2" class="scene-card">
+            <h2 class="text-lg font-bold mb-4 px-2 text-slate-500">「あふれるタスク」をさばく整理術</h2>
+            <div class="space-y-6">
+                <div class="bg-white rounded-3xl shadow-md p-5 border border-slate-100">
+                    <h3 class="font-bold text-blue-700 mb-2 flex items-center"><span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs mr-2">1</span>タスクの可視化と整理</h3>
+                    <p class="text-sm text-slate-600 mb-3">頭の中のタスクをすべて書き出し、客観的に眺めます。</p>
+                    <div class="grid grid-cols-2 gap-2 mb-3">
+                        <div class="bg-slate-50 p-3 rounded-xl"><span class="method-badge mb-1 inline-block">やり方</span><p class="text-[11px]">緊急度と重要度の2軸で整理。</p></div>
+                        <div class="bg-slate-50 p-3 rounded-xl"><span class="benefit-badge mb-1 inline-block">メリット</span><p class="text-[11px]">「今はこれ」という安心感が生まれる。</p></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md p-5 border border-slate-100">
+                    <h3 class="font-bold text-blue-700 mb-2 flex items-center"><span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs mr-2">2</span>「納期」と「工数」の再確認</h3>
+                    <p class="text-sm text-slate-600 mb-3">曖昧な「急ぎ」を具体的な「数字」に置き換えます。</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div class="bg-slate-50 p-3 rounded-xl"><span class="method-badge mb-1 inline-block">やり方</span><p class="text-[11px]">期限と自分の作業見積時間を照合。</p></div>
+                        <div class="bg-slate-50 p-3 rounded-xl"><span class="benefit-badge mb-1 inline-block">メリット</span><p class="text-[11px]">パンクする前に予定を調整できる。</p></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md p-5 border border-slate-100">
+                    <h3 class="font-bold text-blue-700 mb-2 flex items-center"><span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs mr-2">3</span>上司による優先順位の調整</h3>
+                    <p class="text-sm text-slate-600 mb-3">判断できない場合は、決定権を持つ人に委ねます。</p>
+                    <div class="bg-blue-600 text-white p-4 rounded-2xl mb-3 text-sm font-bold">
+                        「A・B・Cの案件があり、すべて受けるとBが遅れます。どの順で進めるべきでしょうか？」
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md p-5 border border-slate-100">
+                    <h3 class="font-bold text-blue-700 mb-2 flex items-center"><span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs mr-2">4</span>クイックレスポンス（5分ルール）</h3>
+                    <p class="text-sm text-slate-600 mb-3">すぐに終わる作業を先に片付けてボールを持ちすぎないように。</p>
+                    <div class="bg-slate-50 p-3 rounded-xl mb-3"><span class="benefit-badge mb-1 inline-block">メリット</span><p class="text-[11px]">リストから項目が早く消え、相手のストレスも減る。</p></div>
+                </div>
+
+                <div class="bg-white rounded-3xl shadow-md p-5 border border-slate-100">
+                    <h3 class="font-bold text-blue-700 mb-2 flex items-center"><span class="w-6 h-6 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xs mr-2">5</span>期待値のコントロール</h3>
+                    <p class="text-sm text-slate-600 mb-3">Noと言わずに、可能な範囲の「代替案」で交渉します。</p>
+                    <div class="bg-blue-600 text-white p-4 rounded-2xl text-sm font-bold">
+                        「本日中に要点1枚のサマリーなら提出可能です。こちらでいかがでしょうか？」
+                    </div>
+                </div>
+
+                <div class="bg-blue-50 p-6 rounded-3xl border border-blue-100">
+                    <h3 class="font-bold text-blue-800 mb-2 flex items-center"><i class="fa-solid fa-lightbulb mr-2"></i>実践のアドバイス</h3>
+                    <p class="text-sm text-blue-900 leading-relaxed">
+                        依頼集中時は<strong>「沈黙」が最大の敵</strong>です。早めに「着手は◯時になります」と一言共有するだけで、周囲の安心感が変わります。
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MY PAGE: LocalStorage Base -->
+        <div id="scenemypage" class="scene-card">
+            <h2 class="text-lg font-bold mb-4 px-2 text-slate-500">マイメモ</h2>
+            <div class="bg-white p-4 rounded-2xl shadow-sm mb-6 border border-slate-100">
+                <textarea id="memo-input" rows="3" placeholder="今日の学びや優先順位をメモ..." class="w-full bg-slate-50 border-none rounded-xl px-4 py-2 text-sm mb-2 focus:ring-2 focus:ring-blue-500"></textarea>
+                <button onclick="saveMemo()" class="w-full bg-blue-600 text-white py-2 rounded-xl text-sm font-bold shadow-md hover:bg-blue-700 transition">保存する</button>
+            </div>
+            <div id="memo-list" class="space-y-4"></div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Nav -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-slate-900/95 backdrop-blur-md text-white py-3 px-6 rounded-full shadow-2xl flex justify-around items-center z-50">
+        <button onclick="showScene('sim')" class="text-center opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-wand-magic-sparkles text-lg"></i><p class="text-[8px] mt-1">診断</p></button>
+        <div class="h-6 w-[1px] bg-slate-700"></div>
+        <button onclick="showScene(1)" class="text-center opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-book text-lg"></i><p class="text-[8px] mt-1">指示集</p></button>
+        <div class="h-6 w-[1px] bg-slate-700"></div>
+        <button onclick="showScene(2)" class="text-center opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-list-check text-lg"></i><p class="text-[8px] mt-1">優先順</p></button>
+        <div class="h-6 w-[1px] bg-slate-700"></div>
+        <button onclick="showScene('mypage')" class="text-center opacity-70 hover:opacity-100 transition"><i class="fa-solid fa-folder-open text-lg"></i><p class="text-[8px] mt-1">メモ</p></button>
+    </div>
+
+    <script>
+        // Tab Management
+        function showScene(id) {
+            document.querySelectorAll('.scene-card').forEach(card => card.classList.remove('active'));
+            document.getElementById('scene' + id).classList.add('active');
+            document.querySelectorAll('.tab-btn').forEach(tab => {
+                tab.classList.remove('tab-active');
+                tab.classList.add('text-slate-500');
+            });
+            document.getElementById('tab' + id).classList.add('tab-active');
+            document.getElementById('tab' + id).classList.remove('text-slate-500');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if(id === 'mypage') renderMemos();
+        }
+
+        // Logic-based Simulator
+        function runCheck() {
+            const checks = [
+                { id: 'check-deadline', label: '期限' },
+                { id: 'check-target', label: '相手' },
+                { id: 'check-format', label: '形式' },
+                { id: 'check-priority', label: '優先度' }
+            ];
+            
+            const missing = checks.filter(c => !document.getElementById(c.id).checked);
+            const score = Math.round(((checks.length - missing.length) / checks.length) * 100);
+            const resultArea = document.getElementById('check-result');
+            resultArea.classList.remove('hidden');
+
+            let advice = "";
+            if (score === 100) {
+                advice = "パーフェクト！すぐに着手できそうです。";
+            } else {
+                advice = `不足要素（${missing.map(m => m.label).join('、')}）を確認しましょう。おすすめの聞き返し：「念のため確認ですが、${missing[0].label}についてはどのようにお考えでしょうか？」`;
+            }
+
+            resultArea.innerHTML = `
+                <div class="text-center mb-4">
+                    <p class="text-xs text-slate-500 font-bold">指示の解像度</p>
+                    <p class="text-4xl font-black text-blue-600">${score}%</p>
+                </div>
+                <p class="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl">${advice}</p>
+            `;
+        }
+
+        // LocalStorage Memo
+        function saveMemo() {
+            const input = document.getElementById('memo-input');
+            const content = input.value.trim();
+            if (!content) return;
+
+            const memos = JSON.parse(localStorage.getItem('zworks_memos') || '[]');
+            memos.unshift({ content, date: new Date().toLocaleString() });
+            localStorage.setItem('zworks_memos', JSON.stringify(memos));
+            input.value = '';
+            renderMemos();
+        }
+
+        function renderMemos() {
+            const container = document.getElementById('memo-list');
+            const memos = JSON.parse(localStorage.getItem('zworks_memos') || '[]');
+            if (memos.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-400 py-8">メモはまだありません</p>';
+                return;
+            }
+            container.innerHTML = memos.map((m, i) => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[10px] text-slate-400">${m.date}</span>
+                        <button onclick="deleteMemo(${i})" class="text-red-400 text-xs"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                    <p class="text-sm text-slate-700">${m.content.replace(/\n/g, '<br>')}</p>
+                </div>
+            `).join('');
+        }
+
+        function deleteMemo(index) {
+            const memos = JSON.parse(localStorage.getItem('zworks_memos') || '[]');
+            memos.splice(index, 1);
+            localStorage.setItem('zworks_memos', JSON.stringify(memos));
+            renderMemos();
+        }
+
+        // Initialize user ID
+        let uid = localStorage.getItem('zworks_uid');
+        if (!uid) {
+            uid = 'GUEST-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            localStorage.setItem('zworks_uid', uid);
+        }
+        document.getElementById('user-id-display').innerText = 'User: ' + uid;
+    </script>
+</body>
+</html>
